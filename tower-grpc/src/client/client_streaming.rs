@@ -7,7 +7,7 @@ use std::fmt;
 
 use futures::{Future, Poll, Stream};
 use http::{response, Response};
-use prost::Message;
+use protobuf::Message;
 
 pub struct ResponseFuture<T, U, B: Body> {
     state: State<T, U, B>,

@@ -1,11 +1,10 @@
 use body::{BoxBody, HttpBody};
 use generic::{DecodeBuf, EncodeBuf};
 
-use bytes::BufMut;
+use bytes::{Buf, BufMut};
 use futures::{Poll, Stream};
 use http;
-use prost::DecodeError;
-use prost::Message;
+use protobuf::{CodedInputStream, CodedOutputStream, Message, ProtobufError};
 
 use std::fmt;
 use std::marker::PhantomData;
@@ -92,14 +91,17 @@ where
     const CONTENT_TYPE: &'static str = "application/grpc+proto";
 
     fn encode(&mut self, item: T, buf: &mut EncodeBuf) -> Result<(), ::Status> {
-        let len = item.encoded_len();
-
+        let len = item.compute_size() as usize;
         if buf.remaining_mut() < len {
             buf.reserve(len);
+            assert!(unsafe { buf.bytes_mut().len() } >= len);
         }
-
-        item.encode(buf)
-            .map_err(|_| unreachable!("Message only errors if not enough space"))
+        unsafe {
+            item.write_to(&mut CodedOutputStream::bytes(buf.bytes_mut()))
+                .unwrap();
+            buf.advance_mut(len);
+        }
+        Ok(())
     }
 }
 
@@ -121,7 +123,8 @@ where
     }
 }
 
-fn from_decode_error(error: DecodeError) -> ::Status {
+#[allow(dead_code)]
+fn from_decode_error(error: ProtobufError) -> ::Status {
     // Map Protobuf parse errors to an INTERNAL status code, as per
     // https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
     ::Status::new(::Code::Internal, error.to_string())
@@ -134,7 +137,28 @@ where
     type Item = T;
 
     fn decode(&mut self, buf: &mut DecodeBuf) -> Result<T, ::Status> {
-        Message::decode(buf).map_err(from_decode_error)
+        impl<'a> ::std::io::Read for DecodeBuf<'a> {
+            fn read(&mut self, buf: &mut [u8]) -> ::std::io::Result<usize> {
+                let len = ::std::cmp::min(Buf::bytes(self).len(), buf.len());
+                unsafe { ::std::ptr::copy(&Buf::bytes(self)[0], &mut buf[0], len) };
+                self.advance(len);
+                Ok(len)
+            }
+        }
+
+        impl<'a> ::std::io::BufRead for DecodeBuf<'a> {
+            fn fill_buf(&mut self) -> ::std::io::Result<&[u8]> {
+                Ok(Buf::bytes(self))
+            }
+            fn consume(&mut self, amt: usize) {
+                self.advance(amt);
+            }
+        }
+
+        let mut t = T::new();
+        let mut s = CodedInputStream::from_buffered_reader(buf);
+        t.merge_from(&mut s).unwrap();
+        Ok(t)
     }
 }
 
@@ -149,7 +173,7 @@ impl<T> Clone for Decoder<T> {
 impl<T> Encode<T>
 where
     T: Stream<Error = ::Status>,
-    T::Item: ::prost::Message,
+    T::Item: ::protobuf::Message,
 {
     pub(crate) fn new(inner: ::generic::Encode<Encoder<T::Item>, T>) -> Self {
         Encode { inner }
@@ -159,7 +183,7 @@ where
 impl<T> HttpBody for Encode<T>
 where
     T: Stream<Error = ::Status>,
-    T::Item: ::prost::Message,
+    T::Item: ::protobuf::Message,
 {
     type Data = <::generic::Encode<Encoder<T::Item>, T> as HttpBody>::Data;
     type Error = <::generic::Encode<Encoder<T::Item>, T> as HttpBody>::Error;

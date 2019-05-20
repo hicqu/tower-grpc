@@ -5,7 +5,7 @@ use Body;
 
 use futures::{Future, Poll};
 use http::Response;
-use prost::Message;
+use protobuf::Message;
 
 #[derive(Debug)]
 pub struct ResponseFuture<T, U> {

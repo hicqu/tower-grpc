@@ -11,13 +11,13 @@ use generic::server::{
 use Body;
 
 use http;
-use prost;
+use protobuf;
 
 pub fn unary<T, B, R>(service: T, request: http::Request<B>) -> unary::ResponseFuture<T, B, R>
 where
     T: UnaryService<R>,
-    R: prost::Message + Default,
-    T::Response: prost::Message,
+    R: protobuf::Message + Default,
+    T::Response: protobuf::Message,
     B: Body,
 {
     let mut grpc = Grpc::new(Codec::new());
@@ -31,8 +31,8 @@ pub fn client_streaming<T, R, B>(
 ) -> client_streaming::ResponseFuture<T, Streaming<R, B>>
 where
     T: ClientStreamingService<Streaming<R, B>>,
-    R: prost::Message + Default,
-    T::Response: prost::Message,
+    R: protobuf::Message + Default,
+    T::Response: protobuf::Message,
     B: Body,
 {
     let mut grpc = Grpc::new(Codec::new());
@@ -46,8 +46,8 @@ pub fn server_streaming<T, B, R>(
 ) -> server_streaming::ResponseFuture<T, B, R>
 where
     T: ServerStreamingService<R>,
-    R: prost::Message + Default,
-    T::Response: prost::Message,
+    R: protobuf::Message + Default,
+    T::Response: protobuf::Message,
     B: Body,
 {
     let mut grpc = Grpc::new(Codec::new());
@@ -61,8 +61,8 @@ pub fn streaming<T, R, B>(
 ) -> streaming::ResponseFuture<T, Streaming<R, B>>
 where
     T: StreamingService<Streaming<R, B>>,
-    R: prost::Message + Default,
-    T::Response: prost::Message,
+    R: protobuf::Message + Default,
+    T::Response: protobuf::Message,
     B: Body,
 {
     let mut grpc = Grpc::new(Codec::new());

@@ -6,15 +6,15 @@ use generic::Streaming;
 use Body;
 
 use futures::{Future, Poll};
-use {http, prost};
+use {http, protobuf};
 
 use std::fmt;
 
 pub struct ResponseFuture<T, B, R>
 where
     T: UnaryService<R>,
-    R: prost::Message + Default,
-    T::Response: prost::Message,
+    R: protobuf::Message + Default,
+    T::Response: protobuf::Message,
     B: Body,
 {
     inner: Inner<T, T::Response, R, B>,
@@ -25,8 +25,8 @@ type Inner<T, U, V, B> = unary::ResponseFuture<T, Encoder<U>, Streaming<Decoder<
 impl<T, B, R> ResponseFuture<T, B, R>
 where
     T: UnaryService<R>,
-    R: prost::Message + Default,
-    T::Response: prost::Message,
+    R: protobuf::Message + Default,
+    T::Response: protobuf::Message,
     B: Body,
 {
     pub(crate) fn new(inner: Inner<T, T::Response, R, B>) -> Self {
@@ -37,8 +37,8 @@ where
 impl<T, B, R> Future for ResponseFuture<T, B, R>
 where
     T: UnaryService<R>,
-    R: prost::Message + Default,
-    T::Response: prost::Message,
+    R: protobuf::Message + Default,
+    T::Response: protobuf::Message,
     B: Body,
 {
     type Item = http::Response<Encode<Once<T::Response>>>;
@@ -54,8 +54,8 @@ where
 impl<T, B, R> fmt::Debug for ResponseFuture<T, B, R>
 where
     T: UnaryService<R> + fmt::Debug,
-    R: prost::Message + Default + fmt::Debug,
-    T::Response: prost::Message + fmt::Debug,
+    R: protobuf::Message + Default + fmt::Debug,
+    T::Response: protobuf::Message + fmt::Debug,
     T::Future: fmt::Debug,
     B: Body + fmt::Debug,
     B::Data: fmt::Debug,

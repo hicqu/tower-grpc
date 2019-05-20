@@ -2,7 +2,7 @@ use codec::{Encode, Encoder};
 use generic::server::{client_streaming, unary, ClientStreamingService};
 
 use futures::{Future, Poll, Stream};
-use {http, prost};
+use {http, protobuf};
 
 use std::fmt;
 
@@ -20,8 +20,8 @@ impl<T, S> ResponseFuture<T, S>
 where
     T: ClientStreamingService<S>,
     S: Stream<Error = ::Status>,
-    S::Item: prost::Message + Default,
-    T::Response: prost::Message,
+    S::Item: protobuf::Message + Default,
+    T::Response: protobuf::Message,
 {
     pub(crate) fn new(inner: Inner<T::Future, T::Response>) -> Self {
         ResponseFuture { inner }
@@ -32,8 +32,8 @@ impl<T, S> Future for ResponseFuture<T, S>
 where
     T: ClientStreamingService<S>,
     S: Stream<Error = ::Status>,
-    S::Item: prost::Message + Default,
-    T::Response: prost::Message,
+    S::Item: protobuf::Message + Default,
+    T::Response: protobuf::Message,
 {
     type Item = http::Response<Encode<unary::Once<T::Response>>>;
     type Error = ::error::Never;

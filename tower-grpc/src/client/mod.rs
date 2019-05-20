@@ -5,7 +5,7 @@ pub mod unary;
 
 use futures::{stream, Future, Poll, Stream};
 use http::{uri, Uri};
-use prost::Message;
+use protobuf::Message;
 
 use body::BoxBody;
 use generic::client::{GrpcService, IntoService};

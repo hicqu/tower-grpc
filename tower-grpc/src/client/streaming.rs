@@ -4,7 +4,7 @@ use Body;
 
 use futures::{Future, Poll};
 use http::Response;
-use prost::Message;
+use protobuf::Message;
 
 use Code;
 

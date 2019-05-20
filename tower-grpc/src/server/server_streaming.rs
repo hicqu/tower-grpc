@@ -5,13 +5,13 @@ use Body;
 use std::fmt;
 
 use futures::{Future, Poll};
-use {http, prost};
+use {http, protobuf};
 
 pub struct ResponseFuture<T, B, R>
 where
     T: ServerStreamingService<R>,
     B: Body,
-    R: prost::Message + Default,
+    R: protobuf::Message + Default,
 {
     inner: Inner<T, T::Response, R, B>,
 }
@@ -21,8 +21,8 @@ type Inner<T, U, V, B> = server_streaming::ResponseFuture<T, Encoder<U>, Streami
 impl<T, B, R> ResponseFuture<T, B, R>
 where
     T: ServerStreamingService<R>,
-    R: prost::Message + Default,
-    T::Response: prost::Message,
+    R: protobuf::Message + Default,
+    T::Response: protobuf::Message,
     B: Body,
 {
     pub(crate) fn new(inner: Inner<T, T::Response, R, B>) -> Self {
@@ -33,8 +33,8 @@ where
 impl<T, B, R> Future for ResponseFuture<T, B, R>
 where
     T: ServerStreamingService<R>,
-    R: prost::Message + Default,
-    T::Response: prost::Message,
+    R: protobuf::Message + Default,
+    T::Response: protobuf::Message,
     B: Body,
 {
     type Item = http::Response<Encode<T::ResponseStream>>;
@@ -55,7 +55,7 @@ where
     T::Future: fmt::Debug,
     B: Body + fmt::Debug,
     B::Data: fmt::Debug,
-    R: prost::Message + Default,
+    R: protobuf::Message + Default,
 {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         fmt.debug_struct("server_streaming::ResponseFuture")

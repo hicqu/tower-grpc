@@ -6,7 +6,7 @@ use std::fmt;
 
 use futures::{stream, Future, Poll};
 use http::Response;
-use prost::Message;
+use protobuf::Message;
 
 pub struct ResponseFuture<T, U, B: Body> {
     inner: client_streaming::ResponseFuture<T, U, B>,

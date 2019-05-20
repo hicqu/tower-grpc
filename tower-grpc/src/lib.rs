@@ -15,7 +15,7 @@ extern crate tower_service;
 extern crate tower_util;
 
 #[cfg(feature = "pb")]
-extern crate prost;
+extern crate protobuf;
 #[cfg(feature = "tower-h2")]
 extern crate tower_h2;
 #[cfg(feature = "tower-hyper")]
