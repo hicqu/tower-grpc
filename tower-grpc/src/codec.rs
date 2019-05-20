@@ -25,7 +25,7 @@ pub type Streaming<T, B = BoxBody> = ::generic::Streaming<Decoder<T>, B>;
 
 pub(crate) use generic::Direction;
 
-/// A protobuf encoded gRPC response body
+/// A pb encoded gRPC response body
 pub struct Encode<T>
 where
     T: Stream,
@@ -40,7 +40,7 @@ where
     T: Message,
     U: Message + Default,
 {
-    /// Create a new protobuf codec
+    /// Create a new pb codec
     pub fn new() -> Self {
         Codec(PhantomData)
     }

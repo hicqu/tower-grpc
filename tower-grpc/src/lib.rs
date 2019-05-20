@@ -14,7 +14,7 @@ extern crate tower_http;
 extern crate tower_service;
 extern crate tower_util;
 
-#[cfg(feature = "protobuf")]
+#[cfg(feature = "pb")]
 extern crate prost;
 #[cfg(feature = "tower-h2")]
 extern crate tower_h2;
@@ -36,15 +36,15 @@ pub use request::Request;
 pub use response::Response;
 pub use status::{Code, Status};
 
-#[cfg(feature = "protobuf")]
+#[cfg(feature = "pb")]
 pub mod server;
 
 /// Type re-exports used by generated code
-#[cfg(feature = "protobuf")]
+#[cfg(feature = "pb")]
 pub mod codegen;
 
-#[cfg(feature = "protobuf")]
+#[cfg(feature = "pb")]
 mod codec;
 
-#[cfg(feature = "protobuf")]
+#[cfg(feature = "pb")]
 pub use codec::{Encode, Streaming};

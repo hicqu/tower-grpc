@@ -16,7 +16,7 @@ pub struct Grpc<T> {
     inner: T,
 }
 
-/// Convert a stream of protobuf messages to an HTTP body payload.
+/// Convert a stream of pb messages to an HTTP body payload.
 ///
 /// TODO: Rename to `IntoEncode` or something...
 pub trait Encodable<T> {
